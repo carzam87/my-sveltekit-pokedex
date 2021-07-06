@@ -10,7 +10,6 @@
 <script>
     import {fade} from 'svelte/transition'
     export let pokeman
-    console.log(pokeman)
     const type = pokeman.types[0].type.name
 </script>
 <div class="flex flex-col items-center" in:fade>
