@@ -1,6 +1,5 @@
 <script>
-import { pokemon } from "../stores/pokestore"
-import {fade, slide} from 'svelte/transition'
+import {fade} from 'svelte/transition'
 export let pokeman
 </script>
 <a class="p-6 bg-gray-100 text-gray-800 text-center rounded-md shadow-sm 
