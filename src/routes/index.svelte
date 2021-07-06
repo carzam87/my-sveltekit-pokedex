@@ -1,35 +1,44 @@
-<script context="module">
-	export async function load({ page }) {
-		const url = `https://pokeapi.co/api/v2/pokemon?limit=150`;
-		const res = await fetch(url);
-		const data = await res.json();
-		const loadedPokemon = data.results.map((data, index) => {
-			return {
-				name: data.name,
-				id: index + 1,
-				image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${
-					index + 1
-				}.png`
-			};
-		});
-        return {props:{pokemon:loadedPokemon}}
-	}
-</script>
-
 <script>
 	import PokemanCard from '../components/pokemanCard.svelte';
-    export let pokemon
+	import { onMount } from 'svelte';
+
+	import { pokemon, fetchPokemon, next, previous, getParameterByName } from '../stores/pokestore';
 	let searchTerm = '';
 	let filteredPokemon = [];
+	
+	onMount(async () => {
+		let url = `https://pokeapi.co/api/v2/pokemon?limit=150`;
+		url = updateFetchUrl(url)
+		fetchPokemon(url);
+	});
+
+	const updateFetchUrl = (url) => {
+		const offset = getParameterByName('offset', window.location.href) | 0;
+		if (offset && offset > 0) {
+			url += `&offset=${offset}`;
+		}
+		return url
+	};
+
+	const handleNext = () => {
+		fetchPokemon($next);
+		const offset = getParameterByName('offset', $next) | 0;
+		window.history.replaceState(null, null, `?offset=${offset}`);
+	};
+	const handlePrevious = () => {
+		fetchPokemon($previous);
+		const offset = getParameterByName('offset', $previous) | 0;
+		window.history.replaceState(null, null, `?offset=${offset}`);
+	};
 
 	$: {
 		if (searchTerm) {
 			//search the pokemon
-			filteredPokemon = pokemon.filter((p) =>
+			filteredPokemon = $pokemon.filter((p) =>
 				p.name.toLowerCase().includes(searchTerm.toLowerCase())
 			);
 		} else {
-			filteredPokemon = [...pokemon];
+			filteredPokemon = [...$pokemon];
 		}
 	}
 </script>
@@ -51,4 +60,16 @@
 	{#each filteredPokemon as pokeman}
 		<PokemanCard {pokeman} />
 	{/each}
+</div>
+
+<br />
+<br />
+<div class="flex justify-evenly">
+	{#if $previous}
+		<a on:click={handlePrevious} href="">Previous</a>
+	{/if}
+
+	{#if $next}
+		<a on:click={handleNext} href="">Next</a>
+	{/if}
 </div>
